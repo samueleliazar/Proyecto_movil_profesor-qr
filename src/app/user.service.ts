@@ -73,7 +73,8 @@ export class UserService {
   }
   async loginWithEmail(correo: string, contrasena: string): Promise<any> {
     return await this.auth.signInWithEmailAndPassword(correo, contrasena);
-  }
+  } 
+  
 
   // Método para obtener el usuario por su ID (UID)
   getUserById(studentId: string): Observable<any> {

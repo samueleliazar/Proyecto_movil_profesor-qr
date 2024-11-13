@@ -5,7 +5,4 @@ export interface Asistencia {
     ramo: string;
     studentId: string;
 }
-interface RamoData {
-    nombre: string;
-    ramo: string;  // O cualquier otra propiedad que esté en tu documento
-  }
+
