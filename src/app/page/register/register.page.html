@@ -1,0 +1,36 @@
+<app-encabezado></app-encabezado>
+
+<ion-content>
+  <form (ngSubmit)="Register()" #registerForm="ngForm">
+    <ion-list class="custom-list">
+      <ion-list-header class="title" color="primary">
+        <ion-label>Registrar</ion-label>
+      </ion-list-header>
+
+      <ion-item >
+        <ion-label position="floating">Nombre:</ion-label>
+        <ion-input type="text" [(ngModel)]="nombre" name="nombre" required></ion-input>
+      </ion-item>
+      <ion-item >
+        <ion-label position="floating">Apellido:</ion-label>
+        <ion-input type="text" [(ngModel)]="apellido" name="apellido" required></ion-input>
+      </ion-item>
+      <ion-item >
+        <ion-label position="floating">Correo institucional:</ion-label>
+        <ion-input type="email" [(ngModel)]="correo" name="correo" required></ion-input>
+      </ion-item>
+      <ion-item >
+        <ion-label position="floating">Contraseña:</ion-label>
+        <ion-input type="password" [(ngModel)]="contrasena" name="contrasena" required></ion-input>
+      </ion-item>
+      <ion-item class="labels">
+        <ion-label position="floating">Confirmar contraseña:</ion-label>
+        <ion-input type="password" [(ngModel)]="confirmarContrasena" name="confirmarContrasena" required></ion-input>
+      </ion-item>
+
+      <div class="buttom">
+        <ion-button type="submit" class="buttom" [disabled]="!registerForm.valid">Registrarme</ion-button>
+      </div>
+    </ion-list>
+  </form>
+</ion-content>

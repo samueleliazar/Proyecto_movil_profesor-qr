@@ -1,0 +1,30 @@
+<app-encabezado></app-encabezado>
+<ion-content>
+    <ion-list class="custom-list">
+      <ion-list-header class="title" color="primary">
+        <ion-label>Crear </ion-label>
+      </ion-list-header>
+
+      <ion-item >
+        <ion-label position="floating">Nombre Ramo:</ion-label>
+        <ion-input type="text" [(ngModel)]="nombre_ramo" name="nombre_ramo" required></ion-input>
+      </ion-item>
+      <ion-item >
+        <ion-label position="floating">Sigla:</ion-label>
+        <ion-input type="text" [(ngModel)]="sigla" name="sigla" required></ion-input>
+      </ion-item>
+      <ion-item >
+        <ion-label position="floating">Fecha-inicio:</ion-label>
+        <ion-input type="date" [(ngModel)]="fecha_inicio" name="fecha-inicio" required></ion-input>
+      </ion-item>
+      <ion-item >
+        <ion-label position="floating">Fecha-termino:</ion-label>
+        <ion-input type="date" [(ngModel)]="fecha_termino" name="fecha-termino" required></ion-input>
+      </ion-item>
+
+      <div class="buttom">
+          <ion-button (click)="crearRamo()" [disabled]="!nombre_ramo || !sigla || !fecha_inicio || !fecha_termino">Crear</ion-button>
+        </div>
+    </ion-list>
+
+</ion-content>

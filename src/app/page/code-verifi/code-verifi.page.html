@@ -1,0 +1,32 @@
+<app-encabezado></app-encabezado>
+
+<ion-content>
+  <ion-list class="custom-list">
+    <div class="custom-container1">
+      <ion-list-header class="list-ini" color="primary">
+        <ion-label>Ingrese gmail:</ion-label>
+      </ion-list-header>
+      <ion-item class="label-dates">
+        <ion-input [(ngModel)]="correo" type="email" placeholder="Ingrese su correo"></ion-input>
+        <ion-input type="correo"> </ion-input>
+      </ion-item>
+    </div>
+
+    <div class="custom-container2">
+      <ion-list-header class="list-ini" color="primary">
+        <ion-label>
+          <h2>Ingresa el código de verificación</h2>
+        </ion-label>
+      </ion-list-header>
+      <ion-item class="label-dates">
+        <ion-label position="floating">
+          Código de Verificación
+        </ion-label>
+        <ion-input type="text" required> </ion-input>
+      </ion-item>
+      <ion-button class="bottom" expand="full" (click)="sendResetPasswordEmail()">
+        Verificar
+      </ion-button> <!-- Cerrar el botón aquí -->
+    </div>
+  </ion-list>
+</ion-content>

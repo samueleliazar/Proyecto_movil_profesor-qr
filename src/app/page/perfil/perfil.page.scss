@@ -1,0 +1,101 @@
+ion-content {
+    --background: #011941;
+}
+
+.custom-list {
+    width: 90%;
+    height: 450px;
+    max-width: 400px;
+    padding: 20px 1px;
+    margin-top: 90px;
+    margin-left: 20px;
+    background-color: #e0e0e0; 
+    border-radius: 15px; 
+}
+
+.custom-img-perfil{
+    margin: auto;
+    width: 130px;
+    height: 130px;
+}
+
+.custom-information{
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    border-radius: 15px;
+}
+
+.title {
+    color: black;
+}
+
+.container-title {
+    margin-left: 120px;
+    margin-right: 120px;
+}
+
+.custom.header {
+    border-radius: 15px;
+}
+
+.custom-margin-img {
+    margin-top: 10px;
+}
+
+.custom-letras {
+    margin-right: 20px;
+}
+
+.custom-button {
+margin-top: 5px;
+display: flex;
+justify-content: center; 
+align-items: center;
+}
+
+.custom-button {
+    display: flex;
+    justify-content: center;
+}
+
+.custom-title {
+    margin-top: 5px;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    margin-left: 100px;
+    margin-right: 100px;
+}
+
+.custom-title {
+    display: flex;
+    justify-content: center;
+}
+
+.title {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    color: white;
+    margin-right: 14px;
+}
+
+.custom-title {
+    display: flex;
+    justify-content: center;
+}
+
+.list-ini {
+    border-radius: 10px;
+}
+
+.list-ini {
+    padding-top: 4px;   /* Ajusta estos valores según sea necesario */
+    padding-bottom: 4px;
+    min-height: auto;    /* Asegúrate de que no haya un valor mínimo que impida reducirlo */
+    height: auto;        /* Ajusta la altura si es necesario */
+    height: 50px;
+}
+
+

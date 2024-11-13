@@ -1,0 +1,17 @@
+<app-encabezado></app-encabezado>
+
+<ion-content>
+  <ion-list class="custom-list">
+    <div class="custom-container-title">
+      <ion-list-header class="list-ini" color="primary">
+        <ion-label>Asignaturas</ion-label>
+      </ion-list-header>
+    </div>
+    <div class="ramos-container">
+    </div>
+    <ion-item detail="true" routerLink="/qr-genrated/{{ item.id }}" *ngFor="let item of vinculos">
+      <ion-label class="i-text-capitalize">{{ item.titulo }}</ion-label>
+      <ion-icon name="{{ item.icono }}" slot="start"></ion-icon>
+    </ion-item>
+  </ion-list>
+</ion-content>

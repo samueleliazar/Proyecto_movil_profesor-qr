@@ -1,0 +1,27 @@
+<app-encabezado></app-encabezado>
+
+<ion-content >
+    <ion-list class="custom-list">
+        <div class="custom-title">
+            <ion-list-header class="list-ini" color="primary">
+                <ion-label class="title">Perfil</ion-label>
+            </ion-list-header>
+        </div>
+        <div class="custom-margin-img">
+            <ion-avatar class="custom-img-perfil">
+                <img alt="Silhouette of a person's head" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+            </ion-avatar>
+        </div>
+        <ion-list class="custom-information">
+            <ion-item class="information">
+                <ion-label>{{ user?.nombre }} {{ user?.apellido }}</ion-label>
+            </ion-item> <ion-item class="information">
+                <ion-label>{{ user?.correo }}</ion-label>
+              </ion-item>
+        </ion-list>
+        <div class="custom-button">
+            <ion-button (click)="cerrar_sesion()">Cerrar sesion</ion-button>
+        </div>
+    </ion-list>
+</ion-content>
+

@@ -1,0 +1,32 @@
+<app-encabezado></app-encabezado>
+
+<ion-content>
+  <ion-card class="custom-class">
+    <!-- Barra de búsqueda -->
+    <ion-searchbar 
+      placeholder="Buscarme en lista" 
+      class="search" 
+      [(ngModel)]="searchTerm"
+      (ionInput)="filterList()"
+    ></ion-searchbar>
+    
+    <ion-card-content>
+      <div class="list-container">
+        <!-- Selector de ramo -->
+        <ion-select [(ngModel)]="selectedRamo" (ionChange)="loadAsistenciaPorRamo()">
+          <ion-select-option *ngFor="let ramo of ramos" [value]="ramo">{{ ramo }}</ion-select-option>
+        </ion-select>
+        
+        <!-- Lista de estudiantes -->
+        <ion-list>
+          <ion-item *ngFor="let asistencia of asistenciaPorRamo">
+            <ion-label>
+              <h2>{{ asistencia.studentName }}</h2>
+              <p>{{ asistencia.date ? (asistencia.date | date: 'short') : 'Fecha no disponible' }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

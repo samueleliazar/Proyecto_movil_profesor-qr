@@ -1,0 +1,30 @@
+<app-encabezado></app-encabezado>
+
+<ion-content>
+  
+  <ion-list class="custom-list">
+    <ion-list>
+      <ion-item *ngFor="let barcode of barcodes">
+        <ion-label position="stacked">{{ barcode.format }}</ion-label>
+        <ion-input type="text" [value]="barcode.rawValue"></ion-input>
+      </ion-item>
+    </ion-list>
+    <div class="container">
+      <div class="link-card">
+        <img src="assets/images/qr.png" alt="Escanear QR" class="center-image">
+        <ion-button (click)="scanQRCode()" [disabled]="!isSupported">
+          <ion-icon slot="start" name="scan"></ion-icon>
+          Escanear QR
+        </ion-button>
+      </div>
+    </div>    
+  </ion-list>
+  <ion-list class="custom-list-second">
+  <div class="container">
+    <div class="link-card" (click)="goToRamos()">
+        <img src="assets/images/cuaderno.png" alt="Ver mis ramos" class="center-imagen">
+        <ion-button expand="block" class="center-button">Ver mis ramos</ion-button>
+      </div>
+    </div>
+  </ion-list>
+</ion-content>

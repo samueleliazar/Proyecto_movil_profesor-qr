@@ -1,0 +1,86 @@
+ion-content {
+    --background: #011941;
+}
+
+.container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    margin-top: 25px;
+}
+
+
+.center-image {
+    width: 600px; 
+}
+
+.custom-list {
+    width: 90%;
+    height: 380px;
+    max-width: 400px;
+    padding: 20px 1px;
+    margin-top: 90px;
+    margin-left: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #e0e0e0; 
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+.lista_alumno{
+    margin-left: 20px;
+    margin-right: 20px;
+
+    border-radius: 10px;
+}
+
+.list-ini {
+    width: 100%; 
+    box-sizing: border-box;
+    border-radius: 15px;
+}
+
+.search {
+    width: 100%; 
+    box-sizing: border-box;
+}
+
+.custom-container-title {
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 10px;
+}
+
+.custom-list {
+    width: 90%;
+    max-width: 400px;
+    padding: 20px 1px;
+    margin: 90px auto 0; 
+    background-color: #e0e0e0; 
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto; 
+    max-height: 400px; 
+}
+
+.custom-container-title {
+    margin: 0 20px 10px; 
+}
+
+.horizontal-accordion {
+    display: flex;
+    flex-direction: column; 
+}
+
+.ramos-container {
+    padding: 16px;
+    background-color: #e0e0e0; 
+    border-radius: 8px; 
+}
