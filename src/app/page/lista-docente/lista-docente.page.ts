@@ -45,21 +45,20 @@ export class ListaDocentePage implements OnInit, OnDestroy {
   } 
   
   loadRamos() {
-    // Obtener los datos del usuario actual (incluyendo el UID) usando async/await
     this.userService.getCurrentUserData().then(userData => {
-      if (userData && userData.uid) {  // Verifica que el usuario tiene un uid
-        const profesorId = userData.uid;  // Aquí obtienes el UID del profesor
-    
-        // Realizar la consulta usando el UID del profesor
+      if (userData && userData.uid) {
+        const profesorId = userData.uid;
+        
+        // Obtener los ramos desde Firestore
         this.firestore.collection('profesores').doc(profesorId).collection('ramos').snapshotChanges().subscribe(snapshot => {
           this.ramos = [];  // Limpiar la lista de ramos
-    
+      
           snapshot.forEach(doc => {
             const data = doc.payload.doc.data() as any;
-            if (data && data['nombre']) {
+            if (data && data['nombre'] && data['qr_id']) {
               this.ramos.push({
                 nombre: data['nombre'],  // Nombre del ramo
-                ramo: data['ramo']       // Información adicional del ramo
+                qr_id: data['qr_id']     // qr_id asociado al ramo
               });
             }
           });
@@ -68,7 +67,7 @@ export class ListaDocentePage implements OnInit, OnDestroy {
         });
       } else {
         console.warn('No se ha encontrado el ID del usuario');
-        this.ramos = [];  // Limpiar los ramos si no hay usuario
+        this.ramos = [];
       }
     }).catch(error => {
       console.error('Error al obtener los datos del usuario:', error);
@@ -77,15 +76,18 @@ export class ListaDocentePage implements OnInit, OnDestroy {
 
   loadAsistenciaPorRamo() {
     if (this.selectedRamo) {
-      const ramoId = ramoMap[this.selectedRamo as Ramo];
-  
-      // Comprobar si se encontró un qr_id para el ramo seleccionado
-      if (ramoId) {
+      const ramoSeleccionado = this.ramos.find(ramo => ramo.nombre === this.selectedRamo);
+      
+      // Asegúrate de que encontramos el ramo y su qr_id
+      if (ramoSeleccionado && ramoSeleccionado.qr_id) {
+        const ramoId = ramoSeleccionado.qr_id;
+    
+        // Consultar la colección 'asistencia' filtrando por qr_id
         this.firestore.collection('asistencia', ref =>
-          ref.where('qr_id', '==', ramoId)  // Filtrar por qr_id correspondiente al ramo
+          ref.where('qr_id', '==', ramoId)  // Filtrar por qr_id del ramo
         ).snapshotChanges().subscribe(snapshot => {
           this.asistenciaPorRamo = [];
-  
+    
           snapshot.forEach(doc => {
             const data = doc.payload.doc.data() as any;
             if (data && data['nombre_alumno'] && data['date']) {

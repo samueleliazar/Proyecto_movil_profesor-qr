@@ -14,7 +14,7 @@
       <div class="list-container">
         <!-- Selector de ramo -->
         <ion-select [(ngModel)]="selectedRamo" (ionChange)="loadAsistenciaPorRamo()">
-          <ion-select-option *ngFor="let ramo of ramos" [value]="ramo">{{ ramo }}</ion-select-option>
+          <ion-select-option *ngFor="let ramo of ramos" [value]="ramo.nombre">{{ ramo.nombre }}</ion-select-option>
         </ion-select>
         
         <!-- Lista de estudiantes -->
