@@ -22,7 +22,9 @@ export class DocentePage implements OnInit {
   goTocrear_ramo() {
     this.navCtrl.navigateForward('/crear-ramo')
   }
-
+  goToperfil(){
+    this.navCtrl.navigateForward('/perfil')
+  }
   ngOnInit() {
   }
 

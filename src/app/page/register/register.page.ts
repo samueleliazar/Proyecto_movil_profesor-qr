@@ -26,16 +26,24 @@ export class RegisterPage implements OnInit {
   async Register() {
     if (this.validateFields()) {
       try {
-        const userCredential = await this.userService.registerUser(this.nombre, this.apellido ,this.correo, this.contrasena);    
+        const userCredential = await this.userService.registerUser(this.nombre, this.apellido, this.correo, this.contrasena);
         const user = userCredential.user;
-
+  
         if (user) { 
           const uid = user.uid;
           const alumnoData = {
             UID: uid,
             Nombre: this.nombre,
             Apellido: this.apellido,
+            Correo: this.correo  // También puedes guardar el correo si lo necesitas
           };
+  
+          // Guardar en localStorage
+          localStorage.setItem('userEmail', this.correo);
+          localStorage.setItem('userUID', uid);
+          localStorage.setItem('userName', this.nombre);
+  
+          // Crear un mensaje de éxito
           const alert = await this.alertController.create({
             header: 'Éxito',
             message: 'Se registró correctamente',

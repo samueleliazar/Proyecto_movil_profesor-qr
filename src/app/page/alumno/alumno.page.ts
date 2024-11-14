@@ -149,4 +149,7 @@ export class AlumnoPage implements OnInit {
     });
     await alert.present();
   }
+  goToperfil(){
+    this.navCtrl.navigateForward('/perfil')
+  }
 }
