@@ -59,7 +59,6 @@ export class AlumnoPage implements OnInit {
   
       // Iniciar el escaneo del código QR
       const { barcodes } = await BarcodeScanner.scan();
-  
       console.log('Datos escaneados:', barcodes); // Verifica los datos escaneados
   
       const barcodeData = barcodes[0]?.rawValue?.trim(); // Eliminar espacios extra
@@ -67,7 +66,7 @@ export class AlumnoPage implements OnInit {
   
       if (barcodeData) {
         // Limpiar el qr_id eliminando el prefijo "QR para " si existe
-        const qr_id = barcodeData.replace('QR para ', '').trim(); 
+        const qr_id = barcodeData.replace('QR para ', '').trim();
         console.log('qr_id limpio:', qr_id);
   
         // Obtener el UID del usuario autenticado
@@ -77,20 +76,37 @@ export class AlumnoPage implements OnInit {
   
           // Obtener el nombre del alumno desde Firestore
           const userDoc = await this.firestore.collection('users').doc(uid).get().toPromise();
-  
           if (userDoc && userDoc.exists) {
             const userData = userDoc.data() as UserData;
             const nombreAlumno = userData?.nombre || 'Desconocido';
   
-            // Registrar la asistencia con el qr_id limpio, nombre del alumno, y otros datos
-            await this.firestore.collection('asistencia').add({
-              qr_id: qr_id,  // ID limpio del ramo escaneado
-              nombre_alumno: nombreAlumno, // Agregamos el nombre del alumno
-              date: Timestamp.now(), // Usar Timestamp en lugar de new Date()
+            // Registrar la asistencia en la colección 'asistencia'
+            const asistenciaRef = this.firestore.collection('asistencia').doc(qr_id);  // Usamos el qr_id como el ID del documento
+            await asistenciaRef.set({
+              qr_id: qr_id,
+              nombre_alumno: nombreAlumno,
+              date: Timestamp.now(),
             });
-  
             console.log('Asistencia registrada correctamente');
-            await this.presentSuccessAlert(); // Mostrar alerta de éxito
+  
+            // Ahora, registrar al estudiante en la subcolección 'estudiantes_inscritos'
+            const estudiantesInscritosRef = asistenciaRef.collection('estudiantes_inscritos');
+  
+            // Verificar si el estudiante ya está inscrito
+            const docSnapshot = await estudiantesInscritosRef.doc(uid).get().toPromise();
+            if (!docSnapshot?.exists) {  // Si no existe el documento, es porque el estudiante no está inscrito
+              await estudiantesInscritosRef.doc(uid).set({
+                nombre_alumno: nombreAlumno,
+                uid: uid,
+              });
+              console.log('Estudiante inscrito correctamente en el ramo');
+            } else {
+              console.log('El estudiante ya está inscrito en este ramo.');
+              await this.presentErrorAlert('Ya estás inscrito en este ramo.');
+            }
+  
+            // Mostrar alerta de éxito
+            await this.presentSuccessAlert();
           } else {
             console.log('Error: No se encontró el usuario en Firestore');
             await this.presentErrorAlert('No se encontró el usuario en la base de datos');
@@ -138,27 +154,5 @@ export class AlumnoPage implements OnInit {
       buttons: ['OK']
     });
     await alert.present();
-  }
-
-  // Método para guardar la asistencia en la colección "asistencia"
-  async saveAssistance(studentId: string, qrId: string) {
-    try {
-      const fecha = new Date(); // Fecha actual
-      const horaRegistro = Timestamp.fromDate(fecha); // Hora de registro
-
-      // Crear el documento en Firestore
-      await this.firestore.collection('asistencia').add({
-        estado: 'Presente', // Suponemos que el estado es 'Presente'
-        fecha: fecha,
-        hora_registro: horaRegistro,
-        id_estudiante: studentId,
-        qr_id: qrId,
-        ramo: qrId, // Puedes ajustar esto si el ramo está almacenado en otro lugar
-      });
-
-      console.log('Asistencia registrada correctamente');
-    } catch (error) {
-      console.error('Error al guardar la asistencia:', error);
-    }
   }
 }
