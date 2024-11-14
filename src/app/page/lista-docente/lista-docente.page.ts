@@ -8,16 +8,6 @@ import { Asistencia } from 'src/app/interfaces/asistencia';
 import { Subscription } from 'rxjs';
 import { Timestamp } from 'firebase/firestore';
 
-type Ramo = 'Inglés' | 'Matemáticas' | 'Programación' | 'Base de Datos';
-
-// Mapa de nombres de ramos a sus correspondientes qr_id
-const ramoMap: { [key in Ramo]: string } = {
-  'Inglés': 'QR para INU201',
-  'Matemáticas': 'QR para MATH101',
-  'Programación': 'QR para PGY301',
-  'Base de Datos': 'QR para BDD401'
-};
-
 @Component({
   selector: 'app-lista-docente',
   templateUrl: './lista-docente.page.html',
@@ -44,6 +34,7 @@ export class ListaDocentePage implements OnInit, OnDestroy {
     this.loadAsistenciaPorRamo();
   } 
   
+  // Método para cargar los ramos desde Firestore
   loadRamos() {
     this.userService.getCurrentUserData().then(userData => {
       if (userData && userData.uid) {
@@ -52,7 +43,7 @@ export class ListaDocentePage implements OnInit, OnDestroy {
         // Obtener los ramos desde Firestore
         this.firestore.collection('profesores').doc(profesorId).collection('ramos').snapshotChanges().subscribe(snapshot => {
           this.ramos = [];  // Limpiar la lista de ramos
-      
+          
           snapshot.forEach(doc => {
             const data = doc.payload.doc.data() as any;
             if (data && data['nombre'] && data['qr_id']) {
@@ -74,6 +65,7 @@ export class ListaDocentePage implements OnInit, OnDestroy {
     });
   }
 
+  // Método para cargar la asistencia filtrada por ramo
   loadAsistenciaPorRamo() {
     if (this.selectedRamo) {
       const ramoSeleccionado = this.ramos.find(ramo => ramo.nombre === this.selectedRamo);
@@ -114,18 +106,21 @@ export class ListaDocentePage implements OnInit, OnDestroy {
     return null;
   }
 
+  // Cambiar el ramo seleccionado
   onRamoChange(event: any) {
     this.selectedRamo = event.target.value;
     console.log('Ramo seleccionado:', this.selectedRamo);
     this.loadAsistenciaPorRamo();
   }
 
+  // Manejo del evento de carga infinita
   onIonInfinite(ev: InfiniteScrollCustomEvent) {
     setTimeout(() => {
       (ev as InfiniteScrollCustomEvent).target.complete();
     }, 500);
   }
 
+  // Función para guardar la lista
   async guardar_list() {
     const alert = await this.alertController.create({
       header: 'Éxito',
@@ -145,13 +140,14 @@ export class ListaDocentePage implements OnInit, OnDestroy {
     await alert.present();
   }
 
+  // Función de logout
   async logout() {
     await this.userService.logout();  // Cerrar sesión del usuario
     this.ramos = [];  // Limpiar los ramos cuando el usuario cierre sesión
     this.asistenciaPorRamo = [];  // Limpiar la lista de asistencia
     console.log('Usuario cerrado sesión y ramos limpiados');
     this.router.navigate(['/login']);  // Redirigir a la página de login
-  } 
+  }
   
   ngOnDestroy() {
     if (this.asistenciaSubscription) {

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning'; // Correcta importación
+import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';  // Correcta importación
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { UserService } from 'src/app/user.service';
@@ -31,12 +31,12 @@ export class AlumnoPage implements OnInit {
   isSupported: boolean = false;
   barcodes: any[] = [];
 
-
   ngOnInit() {
     BarcodeScanner.isSupported().then((result) => {
       this.isSupported = result.supported;
     });
   }
+
   // Redirige a la página de Ramos
   goToRamos() {
     this.router.navigate(['/ramos']); // Cambia '/ramos' por la ruta correspondiente
@@ -66,8 +66,9 @@ export class AlumnoPage implements OnInit {
       console.log("QR data:", barcodeData); // Verifica lo que contiene el QR
   
       if (barcodeData) {
-        const qr_id = barcodeData; // Asignamos el valor completo del QR al qr_id
-        console.log('qr_id:', qr_id);
+        // Limpiar el qr_id eliminando el prefijo "QR para " si existe
+        const qr_id = barcodeData.replace('QR para ', '').trim(); 
+        console.log('qr_id limpio:', qr_id);
   
         // Obtener el UID del usuario autenticado
         const user = await this.auth.currentUser;
@@ -76,14 +77,14 @@ export class AlumnoPage implements OnInit {
   
           // Obtener el nombre del alumno desde Firestore
           const userDoc = await this.firestore.collection('users').doc(uid).get().toPromise();
-          
+  
           if (userDoc && userDoc.exists) {
             const userData = userDoc.data() as UserData;
             const nombreAlumno = userData?.nombre || 'Desconocido';
   
-            // Registrar la asistencia con el qr_id, nombre del alumno, y otros datos
+            // Registrar la asistencia con el qr_id limpio, nombre del alumno, y otros datos
             await this.firestore.collection('asistencia').add({
-              qr_id: qr_id,
+              qr_id: qr_id,  // ID limpio del ramo escaneado
               nombre_alumno: nombreAlumno, // Agregamos el nombre del alumno
               date: Timestamp.now(), // Usar Timestamp en lugar de new Date()
             });
