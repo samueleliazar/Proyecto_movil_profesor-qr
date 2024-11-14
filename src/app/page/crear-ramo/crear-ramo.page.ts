@@ -31,17 +31,22 @@ export class CrearRamoPage implements OnInit {
 
   crearRamo() {
     if (this.nombre_ramo && this.sigla && this.fecha_inicio && this.fecha_termino) {
-      const ramoId = `${this.sigla}-${this.nombre_ramo}`.toUpperCase();
+      const ramoId = `QR_${this.sigla}`.toUpperCase();  // Aquí estamos generando el qr_id
       const nuevoRamo = {
         nombre: this.nombre_ramo,
         sigla: this.sigla,
         fecha_inicio: this.fecha_inicio,
         fecha_termino: this.fecha_termino,
-        qr_id: ramoId,
+        qr_id: ramoId,  // Este es el qr_id que estamos generando
       };
-
+  
       if (this.profesorId) {
-        this.firestore.collection('profesores').doc(this.profesorId).collection('ramos').add(nuevoRamo)
+        // Usamos `doc(ramoId)` para asegurarnos de que el documento en la subcolección 'ramos' tenga el ID 'QR_INU500'
+        this.firestore.collection('profesores')
+          .doc(this.profesorId)  // Accedemos al documento del profesor
+          .collection('ramos')   // Accedemos a la subcolección 'ramos'
+          .doc(ramoId)           // Usamos el qr_id como el ID del documento
+          .set(nuevoRamo)        // Usamos `set` para guardar los datos
           .then(() => {
             console.log('Nuevo ramo creado con éxito');
             this.navCtrl.navigateForward('/asignatura-qr');

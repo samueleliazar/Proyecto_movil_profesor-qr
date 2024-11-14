@@ -4,6 +4,8 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { catchError } from 'rxjs/operators';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 
 @Injectable({
   providedIn: 'root',
@@ -84,5 +86,19 @@ export class UserService {
         throw error;  // O puedes retornar un objeto vacío para manejar el error
       })
     );
+  }
+
+  getUser(): Promise<firebase.User | null> {
+    return new Promise((resolve, reject) => {
+      this.auth.authState.subscribe(user => {
+        if (user) {
+          resolve(user);  // Si el usuario está autenticado, lo devolvemos
+        } else {
+          resolve(null);  // Si no hay usuario, devolvemos null
+        }
+      }, error => {
+        reject(error);  // Si ocurre un error, lo rechazamos
+      });
+    });
   }
 }
