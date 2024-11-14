@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavController } from '@ionic/angular';
-import { AngularFirestore } from '@angular/fire/compat/firestore';  // Para interactuar con Firestore
+import { AngularFirestore } from '@angular/fire/compat/firestore'; 
 import { Observable } from 'rxjs';
 import firebase from 'firebase/compat/app';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
@@ -24,29 +24,28 @@ export class CrearRamoPage implements OnInit {
   ngOnInit() {  
     this.afAuth.onAuthStateChanged((user: firebase.User | null) => {
       if (user) {
-        this.profesorId = user.uid; // Aquí obtenemos el UID del profesor autenticado
+        this.profesorId = user.uid;
       }
     });
   }
 
   crearRamo() {
     if (this.nombre_ramo && this.sigla && this.fecha_inicio && this.fecha_termino) {
-      const ramoId = `QR_${this.sigla}`.toUpperCase();  // Aquí estamos generando el qr_id
+      const ramoId = `QR_${this.sigla}`.toUpperCase(); 
       const nuevoRamo = {
         nombre: this.nombre_ramo,
         sigla: this.sigla,
         fecha_inicio: this.fecha_inicio,
         fecha_termino: this.fecha_termino,
-        qr_id: ramoId,  // Este es el qr_id que estamos generando
+        qr_id: ramoId,  
       };
   
       if (this.profesorId) {
-        // Usamos `doc(ramoId)` para asegurarnos de que el documento en la subcolección 'ramos' tenga el ID 'QR_INU500'
         this.firestore.collection('profesores')
-          .doc(this.profesorId)  // Accedemos al documento del profesor
-          .collection('ramos')   // Accedemos a la subcolección 'ramos'
-          .doc(ramoId)           // Usamos el qr_id como el ID del documento
-          .set(nuevoRamo)        // Usamos `set` para guardar los datos
+          .doc(this.profesorId)  
+          .collection('ramos')   
+          .doc(ramoId)           
+          .set(nuevoRamo)        
           .then(() => {
             console.log('Nuevo ramo creado con éxito');
             this.navCtrl.navigateForward('/asignatura-qr');

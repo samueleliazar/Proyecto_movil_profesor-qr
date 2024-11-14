@@ -20,10 +20,6 @@ const routes: Routes = [
     loadChildren: () => import('./page/alumno/alumno.module').then( m => m.AlumnoPageModule)
   },
   {
-    path: 'verificacion',
-    loadChildren: () => import('./page/verificacion/verificacion.module').then( m => m.VerificacionPageModule)
-  },
-  {
     path: 'qr-genrated/:ramo',  // Asegúrate de que esta ruta existe
     loadChildren: () => import('./page/qr/qr-genrated.module').then(m => m.QrGenratedPageModule)
   },
@@ -54,7 +50,8 @@ const routes: Routes = [
   {
     path: 'asignatura-qr',
     loadChildren: () => import('./page/asignatura-qr/asignatura-qr.module').then( m => m.AsignaturaQrPageModule)
-  },  {
+  },
+  {
     path: 'crear-ramo',
     loadChildren: () => import('./page/crear-ramo/crear-ramo.module').then( m => m.CrearRamoPageModule)
   },

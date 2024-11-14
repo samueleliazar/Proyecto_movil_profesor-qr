@@ -23,7 +23,7 @@ export class PerfilPage implements OnInit {
   async loadUserData() {
     try {
       this.user = await this.userService.getCurrentUserData();
-      console.log('Usuario actual:', this.user);  // Ayuda para verificar que los datos se cargan
+      console.log('Usuario actual:', this.user);  
     } catch (error) {
       console.error('Error al cargar datos del usuario:', error);
     }

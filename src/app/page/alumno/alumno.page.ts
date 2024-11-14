@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';  // Correcta importación
+import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { UserService } from 'src/app/user.service';
@@ -10,7 +10,6 @@ import { AlertController } from '@ionic/angular';
 
 interface UserData {
   nombre: string;
-  // Puedes agregar otras propiedades que tenga el documento de usuario
 }
 
 @Component({
@@ -37,86 +36,81 @@ export class AlumnoPage implements OnInit {
     });
   }
 
-  // Redirige a la página de Ramos
   goToRamos() {
-    this.router.navigate(['/ramos']); // Cambia '/ramos' por la ruta correspondiente
+    this.router.navigate(['/ramos']);
   }
 
-  // Redirige a la página de la lista de alumnos
-  goToListaAlumno() {
-    this.router.navigate(['/lista-alumno']); // Cambia '/lista-alumno' por la ruta correspondiente
-  }
-
-  // Método para iniciar el escaneo del código QR
   async scanQRCode() {
     try {
-      // Verificar permisos de cámara
-      const granted = await this.requestPermissions(); // Solicitar permisos para la cámara
+      const granted = await this.requestPermissions();
       if (!granted) {
         this.presentAlert('Se necesita permiso para acceder a la cámara.');
         return;
       }
-  
-      // Iniciar el escaneo del código QR
+
       const { barcodes } = await BarcodeScanner.scan();
-      console.log('Datos escaneados:', barcodes); // Verifica los datos escaneados
-  
-      const barcodeData = barcodes[0]?.rawValue?.trim(); // Eliminar espacios extra
-      console.log("QR data:", barcodeData); // Verifica lo que contiene el QR
-  
-      if (barcodeData) {
-        // Limpiar el qr_id eliminando el prefijo "QR para " si existe
-        const qr_id = barcodeData.replace('QR para ', '').trim();
-        console.log('qr_id limpio:', qr_id);
-  
-        // Obtener el UID del usuario autenticado
-        const user = await this.auth.currentUser;
-        if (user) {
-          const uid = user.uid;
-  
-          // Obtener el nombre del alumno desde Firestore
-          const userDoc = await this.firestore.collection('users').doc(uid).get().toPromise();
-          if (userDoc && userDoc.exists) {
-            const userData = userDoc.data() as UserData;
-            const nombreAlumno = userData?.nombre || 'Desconocido';
-  
-            // Registrar la asistencia en la colección 'asistencia'
-            const asistenciaRef = this.firestore.collection('asistencia').doc(qr_id);  // Usamos el qr_id como el ID del documento
-            await asistenciaRef.set({
-              qr_id: qr_id,
+      const barcodeData = barcodes[0]?.rawValue?.trim();
+      if (!barcodeData) {
+        await this.presentErrorAlert('No se encontró ningún dato en el QR');
+        return;
+      }
+
+      const qr_id = barcodeData.replace('QR para ', '').trim();
+      const user = await this.auth.currentUser;
+
+      if (user) {
+        const uid = user.uid;
+
+        const userDoc = await this.firestore.collection('users').doc(uid).get().toPromise();
+        if (!userDoc || !userDoc.exists) {
+          await this.presentErrorAlert('No se encontró el usuario en la base de datos');
+          return;
+        }
+
+        const userData = userDoc.data() as UserData;
+        const nombreAlumno = userData?.nombre || 'Desconocido';
+
+        const asistenciaRef = this.firestore.collection('asistencia').doc(qr_id);
+        await asistenciaRef.set({
+          qr_id: qr_id,
+          nombre_alumno: nombreAlumno,
+          date: Timestamp.now(),
+        });
+
+        const professorUID = user.uid; // Obtén el UID del profesor de forma dinámica
+
+        const ramoRef = this.firestore
+          .collection('profesores')
+          .doc(professorUID)
+          .collection('ramos')
+          .doc(qr_id);
+
+        const ramoDoc = await ramoRef.get().toPromise();
+        if (ramoDoc && ramoDoc.exists) {
+          const ramoData = ramoDoc.data() as { nombre: string };
+          const nombreRamo = ramoData?.nombre || 'Nombre no disponible';
+
+          const estudiantesInscritosRef = asistenciaRef.collection('estudiantes_inscritos');
+          const docSnapshot = await estudiantesInscritosRef.doc(uid).get().toPromise();
+
+          if (!docSnapshot?.exists) {
+            await estudiantesInscritosRef.doc(uid).set({
               nombre_alumno: nombreAlumno,
-              date: Timestamp.now(),
+              uid: uid,
+              nombre_ramo: nombreRamo,
             });
-            console.log('Asistencia registrada correctamente');
-  
-            // Ahora, registrar al estudiante en la subcolección 'estudiantes_inscritos'
-            const estudiantesInscritosRef = asistenciaRef.collection('estudiantes_inscritos');
-  
-            // Verificar si el estudiante ya está inscrito
-            const docSnapshot = await estudiantesInscritosRef.doc(uid).get().toPromise();
-            if (!docSnapshot?.exists) {  // Si no existe el documento, es porque el estudiante no está inscrito
-              await estudiantesInscritosRef.doc(uid).set({
-                nombre_alumno: nombreAlumno,
-                uid: uid,
-              });
-              console.log('Estudiante inscrito correctamente en el ramo');
-            } else {
-              console.log('El estudiante ya está inscrito en este ramo.');
-              await this.presentErrorAlert('Ya estás inscrito en este ramo.');
-            }
-  
-            // Mostrar alerta de éxito
+            console.log('Estudiante inscrito correctamente en el ramo:', nombreRamo);
             await this.presentSuccessAlert();
           } else {
-            console.log('Error: No se encontró el usuario en Firestore');
-            await this.presentErrorAlert('No se encontró el usuario en la base de datos');
+            console.log('El estudiante ya está inscrito en este ramo.');
+            await this.presentErrorAlert('Ya estás inscrito en este ramo.');
           }
         } else {
-          await this.presentErrorAlert('Usuario no autenticado.');
+          console.log(`No se encontró el ramo con ID ${qr_id} en la subcolección 'ramos' del profesor`);
+          await this.presentErrorAlert(`No se encontró el ramo en la base de datos.`);
         }
       } else {
-        console.log('Error: No se encontró ningún dato en el QR');
-        await this.presentErrorAlert('No se encontró ningún dato en el QR');
+        await this.presentErrorAlert('Usuario no autenticado.');
       }
     } catch (error) {
       console.error('Error al escanear el código QR', error);
@@ -132,7 +126,7 @@ export class AlumnoPage implements OnInit {
     });
     await alert.present();
   }
-  
+
   async presentAlert(header: string = 'Permiso denegado', message: string = 'Para usar la aplicación autorizar los permisos de cámara'): Promise<void> {
     const alert = await this.alertController.create({
       header,
@@ -144,7 +138,7 @@ export class AlumnoPage implements OnInit {
 
   async requestPermissions(): Promise<boolean> {
     const { camera } = await BarcodeScanner.requestPermissions();
-    return camera === 'granted' || camera === 'limited'; // Ajuste para manejar el permiso 'limited'
+    return camera === 'granted' || camera === 'limited';
   }
 
   async presentErrorAlert(message: string) {

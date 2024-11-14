@@ -25,12 +25,12 @@ ion-content {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 100%; // Ocupa el ancho completo del contenedor
-    padding: 20px 0; // Añade algo de espacio alrededor del QR
+    width: 100%; 
+    padding: 20px 0; 
 }
 
 .center-image {
-    width: 70%; // Ajusta el tamaño de la imagen como porcentaje del contenedor
-    height: auto; // Para mantener la proporción de la imagen
-    margin-bottom: 20px; // Añade un margen entre la imagen y el botón
+    width: 70%; 
+    height: auto; 
+    margin-bottom: 20px;
 }

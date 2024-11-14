@@ -4,10 +4,13 @@
   <ion-list class="custom-list">
     <div class="custom-container-title">
       <ion-list-header class="list-ini" color="primary">
-        <ion-label>Mis ramos</ion-label>
+        <ion-label>Mis Ramos</ion-label>
       </ion-list-header>
     </div>
-    <div class="ramos-container">
-    </div>
+    <ion-list>
+      <ion-item *ngFor="let ramo of ramos">
+        <ion-label>{{ ramo.nombre }}</ion-label>
+      </ion-item>
+    </ion-list>
   </ion-list>
 </ion-content>

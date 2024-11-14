@@ -34,22 +34,20 @@ export class ListaDocentePage implements OnInit, OnDestroy {
     this.loadAsistenciaPorRamo();
   } 
   
-  // Método para cargar los ramos desde Firestore
   loadRamos() {
     this.userService.getCurrentUserData().then(userData => {
       if (userData && userData.uid) {
         const profesorId = userData.uid;
         
-        // Obtener los ramos desde Firestore
         this.firestore.collection('profesores').doc(profesorId).collection('ramos').snapshotChanges().subscribe(snapshot => {
-          this.ramos = [];  // Limpiar la lista de ramos
+          this.ramos = []; 
           
           snapshot.forEach(doc => {
             const data = doc.payload.doc.data() as any;
             if (data && data['nombre'] && data['qr_id']) {
               this.ramos.push({
-                nombre: data['nombre'],  // Nombre del ramo
-                qr_id: data['qr_id']     // qr_id asociado al ramo
+                nombre: data['nombre'], 
+                qr_id: data['qr_id']    
               });
             }
           });
@@ -65,18 +63,17 @@ export class ListaDocentePage implements OnInit, OnDestroy {
     });
   }
 
-  // Método para cargar la asistencia filtrada por ramo
+
   loadAsistenciaPorRamo() {
     if (this.selectedRamo) {
       const ramoSeleccionado = this.ramos.find(ramo => ramo.nombre === this.selectedRamo);
       
-      // Asegúrate de que encontramos el ramo y su qr_id
       if (ramoSeleccionado && ramoSeleccionado.qr_id) {
         const ramoId = ramoSeleccionado.qr_id;
     
-        // Consultar la colección 'asistencia' filtrando por qr_id
+
         this.firestore.collection('asistencia', ref =>
-          ref.where('qr_id', '==', ramoId)  // Filtrar por qr_id del ramo
+          ref.where('qr_id', '==', ramoId) 
         ).snapshotChanges().subscribe(snapshot => {
           this.asistenciaPorRamo = [];
     
@@ -95,7 +92,7 @@ export class ListaDocentePage implements OnInit, OnDestroy {
   }
 
   convertToDate(date: any): Date | null {
-    if (!date) return null;  // Retorna null si 'date' es null o undefined
+    if (!date) return null;  
     if (date instanceof Timestamp) {
       const convertedDate = date.toDate();
       console.log('Fecha convertida:', convertedDate);
@@ -106,21 +103,18 @@ export class ListaDocentePage implements OnInit, OnDestroy {
     return null;
   }
 
-  // Cambiar el ramo seleccionado
   onRamoChange(event: any) {
     this.selectedRamo = event.target.value;
     console.log('Ramo seleccionado:', this.selectedRamo);
     this.loadAsistenciaPorRamo();
   }
 
-  // Manejo del evento de carga infinita
   onIonInfinite(ev: InfiniteScrollCustomEvent) {
     setTimeout(() => {
       (ev as InfiniteScrollCustomEvent).target.complete();
     }, 500);
   }
 
-  // Función para guardar la lista
   async guardar_list() {
     const alert = await this.alertController.create({
       header: 'Éxito',
@@ -140,13 +134,12 @@ export class ListaDocentePage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  // Función de logout
   async logout() {
-    await this.userService.logout();  // Cerrar sesión del usuario
-    this.ramos = [];  // Limpiar los ramos cuando el usuario cierre sesión
-    this.asistenciaPorRamo = [];  // Limpiar la lista de asistencia
+    await this.userService.logout();  
+    this.ramos = [];  
+    this.asistenciaPorRamo = [];  
     console.log('Usuario cerrado sesión y ramos limpiados');
-    this.router.navigate(['/login']);  // Redirigir a la página de login
+    this.router.navigate(['/login']);  
   }
   
   ngOnDestroy() {
@@ -155,8 +148,7 @@ export class ListaDocentePage implements OnInit, OnDestroy {
     }
   }
 
-  // Método para filtrar la lista según el término de búsqueda
+
   filterList() {
-    // Puedes agregar lógica para filtrar la lista si es necesario.
   }
 }

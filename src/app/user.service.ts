@@ -14,14 +14,11 @@ export class UserService {
 
   constructor(private auth: AngularFireAuth, private firestore: AngularFirestore) {}
 
-  // Método para registro de usuario en Firebase
   async registerUser(nombre: string, apellido: string, correo: string, contrasena: string) {
     try {
-      // Crear el usuario en Firebase Authentication
       const userCredential = await this.auth.createUserWithEmailAndPassword(correo, contrasena);
       const user = userCredential.user;
 
-      // Si el usuario fue creado, actualizar el perfil y guardar en Firestore
       if (user) {
         await user.updateProfile({ displayName: nombre });
         
@@ -30,17 +27,16 @@ export class UserService {
           nombre: nombre,
           apellido: apellido,
           correo: correo,
-          uid: user.uid,  // Aquí se guarda el UID de Firebase
+          uid: user.uid, 
         });
       }
 
       return userCredential;
     } catch (error) {
-      throw error;  // Lanzar error para manejarlo en el componente
+      throw error; 
     }
   }
 
-  // Método para enviar correo de recuperación de contraseña
   async sendPasswordResetEmail(correo: string): Promise<void> {
     try {
       await this.auth.sendPasswordResetEmail(correo);
@@ -51,7 +47,6 @@ export class UserService {
     }
   }
 
-  // Método para inicio de sesión
   async login(correo: string, contrasena: string): Promise<void> {
     try {
       await this.auth.signInWithEmailAndPassword(correo, contrasena);
@@ -78,12 +73,12 @@ export class UserService {
   } 
   
 
-  // Método para obtener el usuario por su ID (UID)
+
   getUserById(studentId: string): Observable<any> {
     return this.firestore.collection('usuarios').doc(studentId).get().pipe(
       catchError(error => {
         console.error('Error al obtener usuario', error);
-        throw error;  // O puedes retornar un objeto vacío para manejar el error
+        throw error; 
       })
     );
   }
@@ -92,12 +87,12 @@ export class UserService {
     return new Promise((resolve, reject) => {
       this.auth.authState.subscribe(user => {
         if (user) {
-          resolve(user);  // Si el usuario está autenticado, lo devolvemos
+          resolve(user);  
         } else {
-          resolve(null);  // Si no hay usuario, devolvemos null
+          resolve(null);  
         }
       }, error => {
-        reject(error);  // Si ocurre un error, lo rechazamos
+        reject(error); 
       });
     });
   }

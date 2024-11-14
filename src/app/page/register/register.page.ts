@@ -26,11 +26,10 @@ export class RegisterPage implements OnInit {
   async Register() {
     if (this.validateFields()) {
       try {
-        // Intentar registrar al usuario en Firebase
         const userCredential = await this.userService.registerUser(this.nombre, this.apellido ,this.correo, this.contrasena);    
         const user = userCredential.user;
 
-        if (user) { // Verifica que user no sea null
+        if (user) { 
           const uid = user.uid;
           const alumnoData = {
             UID: uid,
@@ -53,7 +52,6 @@ export class RegisterPage implements OnInit {
           alert.cssClass = 'custom-alert';
           await alert.present();
         } else {
-          // Maneja el caso en que user sea null
           await this.showAlert('Error', 'No se pudo obtener la información del usuario.');
         }
       } catch (error) {
