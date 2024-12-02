@@ -24,7 +24,6 @@ export class AlumnoPage implements OnInit {
 
   isSupported: boolean = false;
   barcodes: any[] = [];
-
   ngOnInit() {
     BarcodeScanner.isSupported().then((result) => {
       this.isSupported = result.supported;
@@ -35,26 +34,21 @@ export class AlumnoPage implements OnInit {
     try {
       const granted = await this.requestPermissions();
       if (!granted) {
-        this.presentAlert(
-          'Permiso denegado',
-          'Se necesita permiso para acceder a la cámara.'
-        );
+        this.presentAlert('Se necesita permiso para acceder a la cámara.');
         return;
       }
 
       const { barcodes } = await BarcodeScanner.scan();
       const barcodeData = barcodes[0]?.rawValue?.trim();
       if (!barcodeData) {
-        await this.presentErrorAlert('No se encontró ningún dato en el QR.');
+        await this.presentErrorAlert('No se encontró ningún dato en el QR');
         return;
       }
 
       // Extraer los datos del QR: asistenciaId, ramoId y profesorUid
       const [asistenciaId, ramoId, profesorUid] = barcodeData.split('-');
       if (!asistenciaId || !ramoId || !profesorUid) {
-        await this.presentErrorAlert(
-          'El código QR no tiene un formato válido.'
-        );
+        await this.presentErrorAlert('El código QR no tiene un formato válido.');
         return;
       }
 
@@ -67,85 +61,79 @@ export class AlumnoPage implements OnInit {
 
       const studentUid = user.uid;
 
-      // Obtener el nombre del estudiante desde la colección "users"
-      const userDoc = await this.firestore
-        .collection('users')
-        .doc(studentUid)
-        .get()
-        .toPromise();
+      // Obtener la información del estudiante desde la colección "users"
+      const userDoc = await this.firestore.collection('users').doc(studentUid).get().toPromise();
       if (!userDoc || !userDoc.exists) {
-        await this.presentErrorAlert(
-          'No se encontró información del estudiante en la base de datos.'
-        );
+        await this.presentErrorAlert('No se encontró el usuario en la base de datos');
         return;
       }
 
       const userData = userDoc.data() as { nombre: string; apellido: string; correo: string };
       const { nombre, apellido, correo } = userData;
 
-      if (!nombre || !apellido || !correo) {
-        await this.presentErrorAlert('Datos incompletos del estudiante.');
-        return;
-      }
-
-      // Verificar si existe el documento de asistencia
-      const asistenciaDocRef = this.firestore
-        .collection('asistencia')
-        .doc(asistenciaId);
-      const asistenciaDoc = await asistenciaDocRef.get().toPromise();
-
-      if (!asistenciaDoc || !asistenciaDoc.exists) {
-        await this.presentErrorAlert(
-          'No se encontró el registro de asistencia en la base de datos.'
-        );
-        return;
-      }
-
-      // Verificar si el estudiante ya está registrado
-      const alumnoRef = asistenciaDocRef
-        .collection('Alumnos')
-        .doc(studentUid);
+      // Función 1: Registrar asistencia
+      const asistenciaDocRef = this.firestore.collection('asistencia').doc(asistenciaId);
+      const alumnoRef = asistenciaDocRef.collection('Alumnos').doc(studentUid);
       const alumnoDoc = await alumnoRef.get().toPromise();
 
       if (alumnoDoc && alumnoDoc.exists) {
-        await this.presentErrorAlert(
-          'Ya has registrado tu asistencia para esta clase.'
-        );
+        await this.presentErrorAlert('Ya has registrado tu asistencia para esta clase.');
+      } else {
+        await alumnoRef.set({
+          uid: studentUid,
+          nombre,
+          apellido,
+          correo,
+        });
+        console.log('Asistencia registrada correctamente para el estudiante:', studentUid);
+      }
+
+      // Función 2: Registrar estudiante en la subcolección "Estudiantes" dentro del ramo del profesor
+      const ramoRef = this.firestore
+        .collection('profesores')
+        .doc(profesorUid)
+        .collection('Ramos')
+        .doc(ramoId);
+
+      const ramoDoc = await ramoRef.get().toPromise();
+      if (!ramoDoc || !ramoDoc.exists) {
+        await this.presentErrorAlert('No se encontró el ramo en la base de datos.');
         return;
       }
 
-      // Registrar al estudiante en la subcolección "Alumnos"
-      await alumnoRef.set({
-        uid: studentUid,
-        nombre,
-        apellido,
-        correo,
-        asistencia: true,
-      });
+      const estudianteRef = ramoRef.collection('Estudiantes').doc(studentUid);
+      const estudianteDoc = await estudianteRef.get().toPromise();
 
-      console.log('Asistencia registrada correctamente para el estudiante:', studentUid);
+      if (estudianteDoc && estudianteDoc.exists) {
+        await this.presentErrorAlert('Ya estás registrado en este ramo.');
+      } else {
+        await estudianteRef.set({
+          uid: studentUid,
+          nombre,
+          apellido,
+          correo,
+        });
+        console.log('Estudiante registrado correctamente en el ramo:', studentUid);
+      }
+
+      // Mostrar éxito si ambas operaciones completaron
       await this.presentSuccessAlert();
     } catch (error) {
-      console.error('Error al registrar la asistencia:', error);
-      await this.presentErrorAlert(
-        'Hubo un error al intentar registrar la asistencia.'
-      );
+      console.error('Error durante el proceso:', error);
+      await this.presentErrorAlert('Hubo un error al intentar registrar la información.');
     }
   }
 
   async presentSuccessAlert(): Promise<void> {
     const alert = await this.alertController.create({
-      header: 'Asistencia registrada',
-      message: 'La asistencia del estudiante ha sido registrada con éxito.',
+      header: 'Registro exitoso',
+      message: 'La información del estudiante ha sido registrada correctamente.',
       buttons: ['OK'],
     });
     await alert.present();
   }
 
-  async presentAlert(
-    header: string = 'Permiso denegado',
-    message: string = 'Para usar la aplicación, autorice los permisos de cámara.'
-  ): Promise<void> {
+  async presentAlert(header: string = 'Permiso denegado', message: string = 'Para usar la aplicación autorizar los permisos de cámara'): Promise<void> {
     const alert = await this.alertController.create({
       header,
       message,
