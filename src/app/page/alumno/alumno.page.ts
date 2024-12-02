@@ -92,7 +92,7 @@ export class AlumnoPage implements OnInit {
       const ramoRef = this.firestore
         .collection('profesores')
         .doc(profesorUid)
-        .collection('Ramos')
+        .collection('ramos')
         .doc(ramoId);
 
       const ramoDoc = await ramoRef.get().toPromise();
