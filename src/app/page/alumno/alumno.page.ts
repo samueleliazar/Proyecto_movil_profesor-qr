@@ -24,6 +24,7 @@ export class AlumnoPage implements OnInit {
 
   isSupported: boolean = false;
   barcodes: any[] = [];
+
   ngOnInit() {
     BarcodeScanner.isSupported().then((result) => {
       this.isSupported = result.supported;
@@ -52,7 +53,6 @@ export class AlumnoPage implements OnInit {
         return;
       }
 
-      // Obtener el UID del estudiante autenticado
       const user = await this.auth.currentUser;
       if (!user) {
         await this.presentErrorAlert('Usuario no autenticado.');
@@ -61,38 +61,21 @@ export class AlumnoPage implements OnInit {
 
       const studentUid = user.uid;
 
-      // Obtener la información del estudiante desde la colección "users"
+      // Obtener el nombre y datos del estudiante desde la colección "users"
       const userDoc = await this.firestore.collection('users').doc(studentUid).get().toPromise();
       if (!userDoc || !userDoc.exists) {
         await this.presentErrorAlert('No se encontró el usuario en la base de datos');
         return;
       }
 
-      const userData = userDoc.data() as { nombre: string; apellido: string; correo: string };
+      const userData = userDoc.data() as { nombre: string, apellido: string, correo: string };
       const { nombre, apellido, correo } = userData;
 
-      // Función 1: Registrar asistencia
-      const asistenciaDocRef = this.firestore.collection('asistencia').doc(asistenciaId);
-      const alumnoRef = asistenciaDocRef.collection('Alumnos').doc(studentUid);
-      const alumnoDoc = await alumnoRef.get().toPromise();
-
-      if (alumnoDoc && alumnoDoc.exists) {
-        await this.presentErrorAlert('Ya has registrado tu asistencia para esta clase.');
-      } else {
-        await alumnoRef.set({
-          uid: studentUid,
-          nombre,
-          apellido,
-          correo,
-        });
-        console.log('Asistencia registrada correctamente para el estudiante:', studentUid);
-      }
-
-      // Función 2: Registrar estudiante en la subcolección "Estudiantes" dentro del ramo del profesor
+      // Verificar si existe el ramo del profesor
       const ramoRef = this.firestore
         .collection('profesores')
         .doc(profesorUid)
-        .collection('ramos')
+        .collection('ramos')  // Se cambió de 'Ramos' a 'ramos'
         .doc(ramoId);
 
       const ramoDoc = await ramoRef.get().toPromise();
@@ -101,22 +84,24 @@ export class AlumnoPage implements OnInit {
         return;
       }
 
+      // Verificar si el estudiante ya está registrado en la subcolección Estudiantes
       const estudianteRef = ramoRef.collection('Estudiantes').doc(studentUid);
       const estudianteDoc = await estudianteRef.get().toPromise();
 
       if (estudianteDoc && estudianteDoc.exists) {
-        await this.presentErrorAlert('Ya estás registrado en este ramo.');
+        console.log('El estudiante ya está registrado en la subcolección Estudiantes.');
       } else {
+        console.log('Registrando al estudiante en la subcolección Estudiantes...');
         await estudianteRef.set({
           uid: studentUid,
           nombre,
           apellido,
           correo,
         });
-        console.log('Estudiante registrado correctamente en el ramo:', studentUid);
+        console.log('Estudiante registrado correctamente en la subcolección Estudiantes.');
       }
 
-      // Mostrar éxito si ambas operaciones completaron
+      // Aquí puedes continuar con el proceso de registrar la asistencia si es necesario
       await this.presentSuccessAlert();
     } catch (error) {
       console.error('Error durante el proceso:', error);
@@ -127,7 +112,7 @@ export class AlumnoPage implements OnInit {
   async presentSuccessAlert(): Promise<void> {
     const alert = await this.alertController.create({
       header: 'Registro exitoso',
-      message: 'La información del estudiante ha sido registrada correctamente.',
+      message: 'El estudiante ha sido registrado correctamente.',
       buttons: ['OK'],
     });
     await alert.present();
