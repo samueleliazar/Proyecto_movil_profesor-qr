@@ -3,7 +3,11 @@
 <ion-content>
   <ion-list class="custom-list">
     <div class="qr-container">
-      <qr-code [value]="hola" size="300" errorCorrectionLevel="M" />
+      <!-- Mostrar el código QR generado dinámicamente -->
+      <img *ngIf="qrCode" [src]="qrCode" alt="Código QR generado" />
+
+      <!-- Mostrar un mensaje mientras se genera el QR -->
+      <p *ngIf="!qrCode">Generando código QR, por favor espera...</p>
     </div>
   </ion-list>
 </ion-content>

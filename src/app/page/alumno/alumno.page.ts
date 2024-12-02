@@ -3,14 +3,9 @@ import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { UserService } from 'src/app/user.service';
-import { Timestamp } from 'firebase/firestore';
 import { Router } from '@angular/router';
 import { NavController } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
-
-interface UserData {
-  nombre: string;
-}
 
 @Component({
   selector: 'app-alumno',
@@ -24,7 +19,7 @@ export class AlumnoPage implements OnInit {
     private userService: UserService,
     private router: Router,
     private navCtrl: NavController,
-    private alertController: AlertController,
+    private alertController: AlertController
   ) {}
 
   isSupported: boolean = false;
@@ -34,10 +29,6 @@ export class AlumnoPage implements OnInit {
     BarcodeScanner.isSupported().then((result) => {
       this.isSupported = result.supported;
     });
-  }
-
-  goToRamos() {
-    this.router.navigate(['/ramos']);
   }
 
   async scanQRCode() {
@@ -55,66 +46,62 @@ export class AlumnoPage implements OnInit {
         return;
       }
 
-      const qr_id = barcodeData.replace('QR para ', '').trim();
-      const user = await this.auth.currentUser;
-
-      if (user) {
-        const uid = user.uid;
-
-        const userDoc = await this.firestore.collection('users').doc(uid).get().toPromise();
-        if (!userDoc || !userDoc.exists) {
-          await this.presentErrorAlert('No se encontró el usuario en la base de datos');
-          return;
-        }
-
-        const userData = userDoc.data() as UserData;
-        const nombreAlumno = userData?.nombre || 'Desconocido';
-
-        const asistenciaRef = this.firestore.collection('asistencia').doc(qr_id);
-        await asistenciaRef.set({
-          qr_id: qr_id,
-          nombre_alumno: nombreAlumno,
-          date: Timestamp.now(),
-        });
-
-        const professorUID = user.uid; // Obtén el UID del profesor de forma dinámica
-
-        const ramoRef = this.firestore
-          .collection('profesores')
-          .doc(professorUID)
-          .collection('ramos')
-          .doc(qr_id);
-
-        const ramoDoc = await ramoRef.get().toPromise();
-        if (ramoDoc && ramoDoc.exists) {
-          const ramoData = ramoDoc.data() as { nombre: string };
-          const nombreRamo = ramoData?.nombre || 'Nombre no disponible';
-
-          const estudiantesInscritosRef = asistenciaRef.collection('estudiantes_inscritos');
-          const docSnapshot = await estudiantesInscritosRef.doc(uid).get().toPromise();
-
-          if (!docSnapshot?.exists) {
-            await estudiantesInscritosRef.doc(uid).set({
-              nombre_alumno: nombreAlumno,
-              uid: uid,
-              nombre_ramo: nombreRamo,
-            });
-            console.log('Estudiante inscrito correctamente en el ramo:', nombreRamo);
-            await this.presentSuccessAlert();
-          } else {
-            console.log('El estudiante ya está inscrito en este ramo.');
-            await this.presentErrorAlert('Ya estás inscrito en este ramo.');
-          }
-        } else {
-          console.log(`No se encontró el ramo con ID ${qr_id} en la subcolección 'ramos' del profesor`);
-          await this.presentErrorAlert(`No se encontró el ramo en la base de datos.`);
-        }
-      } else {
-        await this.presentErrorAlert('Usuario no autenticado.');
+      // Extraer los datos del QR: asistenciaId, ramoId y profesorUid
+      const [asistenciaId, ramoId, profesorUid] = barcodeData.split('-');
+      if (!asistenciaId || !ramoId || !profesorUid) {
+        await this.presentErrorAlert('El código QR no tiene un formato válido.');
+        return;
       }
+
+      // Obtener el UID del estudiante autenticado
+      const user = await this.auth.currentUser;
+      if (!user) {
+        await this.presentErrorAlert('Usuario no autenticado.');
+        return;
+      }
+
+      const studentUid = user.uid;
+
+      // Obtener el nombre del estudiante desde la colección "users"
+      const userDoc = await this.firestore.collection('users').doc(studentUid).get().toPromise();
+      if (!userDoc || !userDoc.exists) {
+        await this.presentErrorAlert('No se encontró el usuario en la base de datos');
+        return;
+      }
+
+      const userData = userDoc.data() as { nombre: string };
+      const nombreEstudiante = userData?.nombre || 'Desconocido';
+
+      // Verificar si existe el documento en la colección "asistencia"
+      const asistenciaDocRef = this.firestore.collection('asistencia').doc(asistenciaId);
+      const asistenciaDoc = await asistenciaDocRef.get().toPromise();
+
+      if (!asistenciaDoc || !asistenciaDoc.exists) {
+        await this.presentErrorAlert('No se encontró el registro de asistencia en la base de datos.');
+        return;
+      }
+
+      // Crear el documento del estudiante en la subcolección "Alumnos"
+      const alumnoRef = asistenciaDocRef.collection('Alumnos').doc(studentUid);
+      const alumnoDoc = await alumnoRef.get().toPromise();
+
+      if (alumnoDoc && alumnoDoc.exists) {
+        await this.presentErrorAlert('Ya has registrado tu asistencia para esta clase.');
+        return;
+      }
+
+      // Registrar al estudiante en la subcolección "Alumnos"
+      await alumnoRef.set({
+        uid: studentUid, // UID del estudiante
+        nombre: nombreEstudiante, // Nombre del estudiante
+        asistencia: true, // Asistencia marcada como true
+      });
+
+      console.log('Asistencia registrada correctamente para el estudiante:', studentUid);
+      await this.presentSuccessAlert();
     } catch (error) {
-      console.error('Error al escanear el código QR', error);
-      await this.presentErrorAlert('Hubo un error al intentar escanear el QR');
+      console.error('Error al registrar la asistencia:', error);
+      await this.presentErrorAlert('Hubo un error al intentar registrar la asistencia.');
     }
   }
 
@@ -145,11 +132,16 @@ export class AlumnoPage implements OnInit {
     const alert = await this.alertController.create({
       header: 'Error',
       message: message,
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   }
-  goToperfil(){
-    this.navCtrl.navigateForward('/perfil')
+
+  goToRamos() {
+    this.router.navigate(['/ramos']);
+  }
+
+  goToperfil() {
+    this.navCtrl.navigateForward('/perfil');
   }
 }

@@ -10,7 +10,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
   styleUrls: ['./crear-ramo.page.scss'],
 })
 export class CrearRamoPage implements OnInit {
-  nombre_ramo: string ='';
+  nombreramo: string ='';
   sigla: string = '';
   fecha_inicio: string = '';
   fecha_termino: string ='';
@@ -21,7 +21,7 @@ export class CrearRamoPage implements OnInit {
   goTocrear_ramo() {
     this.navCtrl.navigateForward('/crear-ramo')
   }
-  ngOnInit() {  
+  ngOnInit() {
     this.afAuth.onAuthStateChanged((user: firebase.User | null) => {
       if (user) {
         this.profesorId = user.uid;
@@ -30,22 +30,22 @@ export class CrearRamoPage implements OnInit {
   }
 
   crearRamo() {
-    if (this.nombre_ramo && this.sigla && this.fecha_inicio && this.fecha_termino) {
-      const ramoId = `QR_${this.sigla}`.toUpperCase(); 
+    if (this.nombreramo && this.sigla && this.fecha_inicio && this.fecha_termino) {
+      const ramoId = `QR${this.sigla}`.toUpperCase(); 
       const nuevoRamo = {
-        nombre: this.nombre_ramo,
+        nombre: this.nombreramo,
         sigla: this.sigla,
         fecha_inicio: this.fecha_inicio,
         fecha_termino: this.fecha_termino,
-        qr_id: ramoId,  
+        qr_id: ramoId,
       };
-  
+
       if (this.profesorId) {
         this.firestore.collection('profesores')
-          .doc(this.profesorId)  
-          .collection('ramos')   
-          .doc(ramoId)           
-          .set(nuevoRamo)        
+          .doc(this.profesorId)
+          .collection('ramos')
+          .doc(ramoId)
+          .set(nuevoRamo)
           .then(() => {
             console.log('Nuevo ramo creado con éxito');
             this.navCtrl.navigateForward('/asignatura-qr');
