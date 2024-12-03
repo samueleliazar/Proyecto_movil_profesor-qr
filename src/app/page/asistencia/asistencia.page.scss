@@ -1,0 +1,74 @@
+ion-content {
+    --background: #011941;
+}
+
+.container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+}
+
+
+.center-button {
+    width: 300px; 
+    text-align: center;
+    margin-left: 32px;
+    margin-top: 18px;
+}
+
+.center-image {
+    width: 600px; 
+}
+
+.custom-list {
+    width: 90%;
+    height: 380px;
+    max-width: 400px;
+    padding: 20px 1px;
+    margin-top: 90px;
+    margin-left: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #e0e0e0; 
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+}
+
+.lista_alumno{
+    margin-left: 20px;
+    margin-right: 20px;
+
+    border-radius: 10px;
+}
+
+.search {
+    width: 100%; 
+    box-sizing: border-box; 
+}
+
+ion-card {
+    margin: 20px;
+    border-radius: 10px; 
+    background-color: #e0e0e0; 
+}
+
+ion-list {
+    margin: 0; 
+}
+
+ion-item {
+    --background: black; 
+}
+
+.custom-card {
+    width: 400px; 
+    margin: 0 auto; 
+}
+
+.list-container {
+    max-height: 700px; 
+    overflow-y: auto;
+}

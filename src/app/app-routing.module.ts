@@ -55,6 +55,15 @@ const routes: Routes = [
     path: 'crear-ramo',
     loadChildren: () => import('./page/crear-ramo/crear-ramo.module').then( m => m.CrearRamoPageModule)
   },
+  {
+    path: 'detalle-ramo/:id', // Agregamos el parámetro dinámico ":id"
+    loadChildren: () => import('./page/detalle-ramo/detalle-ramo.module').then(m => m.DetalleRamoPageModule)
+  },  {
+    path: 'asistencia',
+    loadChildren: () => import('./page/asistencia/asistencia.module').then( m => m.AsistenciaPageModule)
+  },
+
+
 
 
 

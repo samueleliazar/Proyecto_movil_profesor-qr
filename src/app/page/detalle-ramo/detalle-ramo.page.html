@@ -2,18 +2,13 @@
 
 <ion-content>
   <ion-card class="custom-class">
-
-
     <ion-card-content>
       <div class="list-container">
         <!-- Lista de ramos -->
         <ion-list>
-          <ion-item 
-            *ngFor="let ramo of filteredRamos" 
-            (click)="goToRamoDetails(ramo.qr_id)">
+          <ion-item *ngFor="let clase of clases" (click)="navigateToAsistencia(clase.id)">
             <ion-label>
-              <h2>{{ ramo.nombre }}</h2>
-              <p>ID Clase: {{ ramo.qr_id }}</p>
+              Fecha: {{ clase.formattedFecha }}
             </ion-label>
           </ion-item>
         </ion-list>

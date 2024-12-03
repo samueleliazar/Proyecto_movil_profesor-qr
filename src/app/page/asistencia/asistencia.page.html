@@ -1,0 +1,45 @@
+<app-encabezado></app-encabezado>
+
+<ion-content>
+  <!-- Titulo de la tarjeta -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Asistencia de la Clase</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <!-- Lista de Alumnos -->
+      <ion-list>
+        <ion-item-divider sticky color="light">
+          <ion-label>#</ion-label>
+          <ion-label>Nombre Completo</ion-label>
+          <ion-label>Asistencia</ion-label>
+        </ion-item-divider>
+
+        <!-- Mostrar los alumnos con su asistencia -->
+        <ion-item *ngFor="let alumno of alumnos; index as i">
+          <!-- Número del alumno -->
+          <ion-label slot="start">{{ i + 1 }}</ion-label>
+
+          <!-- Nombre completo del alumno -->
+          <ion-label>{{ alumno.nombreCompleto }}</ion-label>
+
+          <!-- Mostrar estado de asistencia con íconos -->
+          <ion-label>
+            <ion-icon
+              *ngIf="alumno.asistencia === 'Asistió'"
+              name="checkmark-circle-outline"
+              color="success"
+            ></ion-icon>
+            <ion-icon
+              *ngIf="alumno.asistencia === 'Ausente'"
+              name="close-circle-outline"
+              color="danger"
+            ></ion-icon>
+            {{ alumno.asistencia }}
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
