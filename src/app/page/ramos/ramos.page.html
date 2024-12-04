@@ -8,8 +8,13 @@
       </ion-list-header>
     </div>
     <ion-list>
+      <!-- Mostrar cada ramo en la lista -->
       <ion-item *ngFor="let ramo of ramos">
-        <ion-label>{{ ramo.nombre }}</ion-label>
+        <ion-label>
+          <h2>{{ ramo.nombre }}</h2>
+          <p *ngIf="ramo.id">Asistencia: {{ asistencias[ramo.id] || '0/0' }}</p>
+          <p *ngIf="!ramo.id">Error: ID no disponible</p>
+        </ion-label>
       </ion-item>
     </ion-list>
   </ion-list>
