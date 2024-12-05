@@ -41,6 +41,7 @@ export class PerfilPage implements OnInit {
           cssClass: 'alert-button-white', // Clase para personalizar el botón
           handler: () => {
             console.log('Botón Aceptar presionado');
+            this.router.navigate(['/home']);
           }
         }
       ]
