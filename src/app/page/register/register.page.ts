@@ -116,7 +116,12 @@ export class RegisterPage implements OnInit {
     const alert = await this.alertController.create({
       header,
       message,
-      buttons: ['Aceptar'],
+      buttons: [
+        {
+          text: 'Aceptar',
+          cssClass: 'alert-button-white'
+        }]
+        ,
     });
 
     await alert.present();

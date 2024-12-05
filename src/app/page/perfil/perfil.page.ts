@@ -30,24 +30,20 @@ export class PerfilPage implements OnInit {
   }
 
   async cerrar_sesion() {
-
     this.userService.logout();
-
-    const alert = await this.alertController.create({
+    this.alertController.create({
       header: 'Éxito',
       message: 'La sesión se cerró correctamente.',
+      cssClass: 'custom-alert', // Asegúrate de que esta clase esté definida
       buttons: [
         {
           text: 'Aceptar',
+          cssClass: 'alert-button-white', // Clase para personalizar el botón
           handler: () => {
-            this.router.navigate(['/home']);
-          },
-          cssClass: 'alert-button-white',
-        },
-      ],
-    });
-    alert.cssClass = 'custom-alert';
-
-    await alert.present();
+            console.log('Botón Aceptar presionado');
+          }
+        }
+      ]
+    }).then(alert => alert.present());
   }
 }

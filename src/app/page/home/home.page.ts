@@ -80,7 +80,12 @@ export class HomePage {
       const alert = await this.alertController.create({
         header: 'Error',
         message: 'Credenciales incorrectas o problema de conexión.',
-        buttons: ['Aceptar'],
+        buttons: [
+          {
+            text: 'Aceptar',
+            cssClass: 'alert-button-white'
+          }]
+          ,
       });
       await alert.present();
     }

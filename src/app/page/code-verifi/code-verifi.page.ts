@@ -26,7 +26,12 @@ export class CodeVerifiPage implements OnInit {
       const alert = await this.alertController.create({
         header: 'Error',
         message: 'Hubo un error al enviar el correo. Por favor, verifica tu dirección de correo.',
-        buttons: ['Aceptar'],
+        buttons: [
+          {
+            text: 'Aceptar',
+            cssClass: 'alert-button-white'
+          }]
+          ,
       });
       await alert.present();
     }
