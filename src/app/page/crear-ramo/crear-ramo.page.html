@@ -4,7 +4,9 @@
       <ion-list-header class="title" color="primary">
         <ion-label>Crear </ion-label>
       </ion-list-header>
-
+      <div *ngIf="mensajeError" class="alerta-error">
+        {{ mensajeError }}
+      </div>
       <ion-item >
         <ion-label position="floating">Nombre Ramo:</ion-label>
         <ion-input type="text" [(ngModel)]="nombreramo" name="nombre_ramo" required></ion-input>

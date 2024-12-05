@@ -15,7 +15,7 @@ export class CrearRamoPage implements OnInit {
   fecha_inicio: string = '';
   fecha_termino: string ='';
   profesorId: string = 'profesor-id-aqui';
-
+  mensajeError: string = '';
   constructor(private navCtrl: NavController, private firestore: AngularFirestore, private afAuth: AngularFireAuth) { }
 
   goTocrear_ramo() {
@@ -30,7 +30,17 @@ export class CrearRamoPage implements OnInit {
   }
 
   crearRamo() {
+    this.mensajeError = '';
     if (this.nombreramo && this.sigla && this.fecha_inicio && this.fecha_termino) {
+      const fechaInicio = new Date(this.fecha_inicio);
+      const fechaTermino = new Date(this.fecha_termino);
+
+      // Validación de fechas
+      if (fechaTermino < fechaInicio) {
+        this.mensajeError = 'La fecha de término no puede ser anterior a la fecha de inicio.';
+        return; // Salir si las fechas no son válidas
+      }
+
       const ramoId = `QR${this.sigla}`.toUpperCase(); 
       const nuevoRamo = {
         nombre: this.nombreramo,
@@ -51,7 +61,7 @@ export class CrearRamoPage implements OnInit {
             this.navCtrl.navigateForward('/asignatura-qr');
           })
           .catch((error) => {
-            console.error('Error al crear el ramo:', error);
+            this.mensajeError = 'Error al crear el ramo: ' + error.message;
           });
       } else {
         console.error('No se ha encontrado un usuario autenticado.');
