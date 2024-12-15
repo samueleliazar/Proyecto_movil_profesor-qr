@@ -5,9 +5,8 @@
   </ion-toolbar>
 </ion-header>
 
-
 <ion-content>
-  
+  <!-- Otros contenidos del page -->
   <ion-list class="custom-list">
     <ion-list>
       <ion-item *ngFor="let barcode of barcodes">
@@ -26,11 +25,14 @@
     </div>    
   </ion-list>
   <ion-list class="custom-list-second">
-  <div class="container">
-    <div class="link-card" (click)="goToRamos()">
-        <img src="assets/images/cuaderno.png" alt="Ver mis ramos" class="center-imagen">
-        <ion-button expand="block" class="center-button">Ver mis ramos</ion-button>
+    <div class="container">
+      <div class="link-card" (click)="goToRamos()">
+          <img src="assets/images/cuaderno.png" alt="Ver mis ramos" class="center-imagen">
+          <ion-button expand="block" class="center-button">Ver mis ramos</ion-button>
+        </div>
       </div>
-    </div>
-  </ion-list>
+    </ion-list>
+  
+  <!-- Botón para sincronizar datos con Firebase -->
+  <ion-button expand="full" (click)="syncLocalDataToFirebase()">Sincronizar Datos con Firebase</ion-button>
 </ion-content>

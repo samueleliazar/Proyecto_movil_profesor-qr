@@ -236,6 +236,70 @@ export class AlumnoPage implements OnInit {
     });
     await alert.present();
   }
+  async syncLocalDataToFirebase() {
+    try {
+      const localData = JSON.parse(localStorage.getItem('pendingAttendances') || '[]');
+      if (localData.length === 0) {
+        await this.presentAlert('Sincronización completada', 'No hay datos pendientes para sincronizar.');
+        return;
+      }
+
+      console.log(`Sincronizando ${localData.length} registros pendientes...`);
+      
+      for (const data of localData) {
+        const { asistenciaId, ramoId, profesorUid } = data;
+
+        if (!asistenciaId || !ramoId || !profesorUid) {
+          console.warn('Datos incompletos encontrados en el local storage, omitiendo:', data);
+          continue;
+        }
+
+        const user = await this.auth.currentUser;
+        if (!user) {
+          console.error('Usuario no autenticado. No se puede sincronizar la asistencia.');
+          return;
+        }
+
+        const studentUid = user.uid;
+
+        const userDoc = await this.firestore.collection('users').doc(studentUid).get().toPromise();
+        if (!userDoc || !userDoc.exists) {
+          console.error('No se encontró información del estudiante en la base de datos.');
+          continue;
+        }
+
+        const userData = userDoc.data() as { nombre: string; apellido: string; correo: string };
+        const { nombre, apellido, correo } = userData;
+
+        if (!nombre || !apellido || !correo) {
+          console.error('Datos incompletos del estudiante, omitiendo:', data);
+          continue;
+        }
+
+        await this.firestore
+          .collection('asistencia')
+          .doc(asistenciaId)
+          .collection('Alumnos')
+          .doc(studentUid)
+          .set({
+            uid: studentUid,
+            nombre,
+            apellido,
+            correo,
+            asistencia: true,
+          });
+
+        console.log('Asistencia sincronizada correctamente:', data);
+      }
+
+      localStorage.removeItem('pendingAttendances');
+      console.log('Datos locales sincronizados y eliminados.');
+      await this.presentAlert('Sincronización completada', 'Los datos se han sincronizado con éxito.');
+    } catch (error) {
+      console.error('Error al sincronizar asistencias pendientes:', error);
+      await this.presentErrorAlert('Error al sincronizar los datos.');
+    }
+  }
 
   // Navegación
   goToRamos() {
