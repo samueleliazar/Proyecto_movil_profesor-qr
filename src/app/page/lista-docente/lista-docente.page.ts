@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { InfiniteScrollCustomEvent } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
@@ -27,7 +27,8 @@ export class ListaDocentePage implements OnInit, OnDestroy {
     private alertController: AlertController,
     private router: Router,
     private firestore: AngularFirestore,
-    private userService: UserService
+    private userService: UserService,
+    private loadingController: LoadingController
   ) {}
 
   ngOnInit() {
@@ -37,7 +38,17 @@ export class ListaDocentePage implements OnInit, OnDestroy {
   /**
    * Carga los ramos creados por el profesor actual
    */
-  loadRamos() {
+  async loadRamos() {
+
+    const loading = await this.loadingController.create({
+      message: 'Cargando ramos...', // Mensaje que aparecerá con el spinner
+      spinner: 'crescent', // Tipo de spinner
+      backdropDismiss: false, // Evita que el usuario pueda cerrar el spinner manualmente
+    });
+
+    // Muestra el spinner antes de cargar los datos
+    await loading.present();
+
     this.userService.getCurrentUserData().then((userData) => {
       if (userData && userData.uid) {
         const profesorId = userData.uid;
@@ -59,6 +70,8 @@ export class ListaDocentePage implements OnInit, OnDestroy {
 
               // Actualiza la lista filtrada al cargar
               this.filterList();
+              
+              loading.dismiss();
             },
             (error) => {
               console.error('Error al cargar los ramos:', error);

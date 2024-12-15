@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Timestamp } from 'firebase/firestore';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-detalle-ramo',
@@ -16,7 +17,8 @@ export class DetalleRamoPage implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private firestore: AngularFirestore,
-    private router: Router
+    private router: Router,
+    private loadingController: LoadingController  
   ) {}
 
   ngOnInit() {
@@ -33,7 +35,16 @@ export class DetalleRamoPage implements OnInit {
   }
 
   // Cargar las clases (asistencia) basadas en el id del ramo
-  loadClasesPorRamo() {
+  async loadClasesPorRamo() {
+
+    const loading = await this.loadingController.create({
+      message: 'Cargando fechas del ramo...', // Mensaje que aparecerá con el spinner
+      spinner: 'crescent', // Tipo de spinner
+      backdropDismiss: false, // Evita que el usuario pueda cerrar el spinner manualmente
+    });
+
+    // Muestra el spinner antes de cargar los datos
+    await loading.present();
     if (this.ramoId) {
       this.firestore.collection('asistencia', ref =>
         ref.where('id_ramo', '==', this.ramoId) // Filtrar por id_ramo
@@ -51,6 +62,7 @@ export class DetalleRamoPage implements OnInit {
             });
           }
         });
+        loading.dismiss();
       });
     }
   }

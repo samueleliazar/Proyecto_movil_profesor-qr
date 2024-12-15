@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { LoadingController } from '@ionic/angular';
+
 interface ClaseData {
   id_profesor: string;
   id_ramo: string;
@@ -14,7 +16,11 @@ export class AsistenciaPage implements OnInit {
   claseId: string = ''; // UID del documento de la clase
   alumnos: any[] = []; // Lista de alumnos con su información formateada
 
-  constructor(private route: ActivatedRoute, private firestore: AngularFirestore) { }
+  constructor(
+    private route: ActivatedRoute, 
+    private firestore: AngularFirestore,
+    private loadingController: LoadingController 
+  ) { }
 
   ngOnInit() {
     // Obtener el UID del documento de la clase desde los queryParams
@@ -29,6 +35,15 @@ export class AsistenciaPage implements OnInit {
 
   // Cargar los datos de los alumnos desde la subcolección
   async loadAlumnos() {
+    const loading = await this.loadingController.create({
+      message: 'Cargando lista de la clase...', // Mensaje que aparecerá con el spinner
+      spinner: 'crescent', // Tipo de spinner
+      backdropDismiss: false, // Evita que el usuario pueda cerrar el spinner manualmente
+    });
+
+    // Muestra el spinner antes de cargar los datos
+    await loading.present();
+    
     try {
       // Cargar los alumnos presentes (asistencia)
       const alumnosPresentesSnapshot = await this.firestore
@@ -113,5 +128,6 @@ export class AsistenciaPage implements OnInit {
     } catch (error) {
       console.error('Error al cargar los datos de los alumnos:', error);
     }
+    loading.dismiss();
   }
 }

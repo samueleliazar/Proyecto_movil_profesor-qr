@@ -5,6 +5,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { UserService } from 'src/app/user.service';
 import { Router } from '@angular/router';
 import { NavController, AlertController } from '@ionic/angular';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-alumno',
@@ -21,7 +22,8 @@ export class AlumnoPage implements OnInit {
     private userService: UserService,
     private router: Router,
     private navCtrl: NavController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private loadingController: LoadingController
   ) {}
 
   ngOnInit() {
@@ -236,70 +238,96 @@ export class AlumnoPage implements OnInit {
     });
     await alert.present();
   }
+
   async syncLocalDataToFirebase() {
-    try {
-      const localData = JSON.parse(localStorage.getItem('pendingAttendances') || '[]');
-      if (localData.length === 0) {
-        await this.presentAlert('Sincronización completada', 'No hay datos pendientes para sincronizar.');
+  try {
+    await this.presentLoading(); // Mostrar el indicador de carga
+    const localData = JSON.parse(localStorage.getItem('pendingAttendances') || '[]');
+    
+    if (localData.length === 0) {
+      await this.dismissLoading(); // Ocultar el indicador
+      await this.presentAlert('Sincronización completada', 'No hay datos pendientes para sincronizar.');
+      return;
+    }
+
+    console.log(`Sincronizando ${localData.length} registros pendientes...`);
+    
+    for (const data of localData) {
+      const { asistenciaId, ramoId, profesorUid } = data;
+
+      if (!asistenciaId || !ramoId || !profesorUid) {
+        console.warn('Datos incompletos encontrados en el local storage, omitiendo:', data);
+        continue;
+      }
+
+      const user = await this.auth.currentUser;
+      if (!user) {
+        console.error('Usuario no autenticado. No se puede sincronizar la asistencia.');
+        await this.dismissLoading();
         return;
       }
 
-      console.log(`Sincronizando ${localData.length} registros pendientes...`);
-      
-      for (const data of localData) {
-        const { asistenciaId, ramoId, profesorUid } = data;
+      const studentUid = user.uid;
 
-        if (!asistenciaId || !ramoId || !profesorUid) {
-          console.warn('Datos incompletos encontrados en el local storage, omitiendo:', data);
-          continue;
-        }
-
-        const user = await this.auth.currentUser;
-        if (!user) {
-          console.error('Usuario no autenticado. No se puede sincronizar la asistencia.');
-          return;
-        }
-
-        const studentUid = user.uid;
-
-        const userDoc = await this.firestore.collection('users').doc(studentUid).get().toPromise();
-        if (!userDoc || !userDoc.exists) {
-          console.error('No se encontró información del estudiante en la base de datos.');
-          continue;
-        }
-
-        const userData = userDoc.data() as { nombre: string; apellido: string; correo: string };
-        const { nombre, apellido, correo } = userData;
-
-        if (!nombre || !apellido || !correo) {
-          console.error('Datos incompletos del estudiante, omitiendo:', data);
-          continue;
-        }
-
-        await this.firestore
-          .collection('asistencia')
-          .doc(asistenciaId)
-          .collection('Alumnos')
-          .doc(studentUid)
-          .set({
-            uid: studentUid,
-            nombre,
-            apellido,
-            correo,
-            asistencia: true,
-          });
-
-        console.log('Asistencia sincronizada correctamente:', data);
+      const userDoc = await this.firestore.collection('users').doc(studentUid).get().toPromise();
+      if (!userDoc || !userDoc.exists) {
+        console.error('No se encontró información del estudiante en la base de datos.');
+        continue;
       }
 
-      localStorage.removeItem('pendingAttendances');
-      console.log('Datos locales sincronizados y eliminados.');
-      await this.presentAlert('Sincronización completada', 'Los datos se han sincronizado con éxito.');
+      const userData = userDoc.data() as { nombre: string; apellido: string; correo: string };
+      const { nombre, apellido, correo } = userData;
+
+      if (!nombre || !apellido || !correo) {
+        console.error('Datos incompletos del estudiante, omitiendo:', data);
+        continue;
+      }
+
+      await this.firestore
+        .collection('asistencia')
+        .doc(asistenciaId)
+        .collection('Alumnos')
+        .doc(studentUid)
+        .set({
+          uid: studentUid,
+          nombre,
+          apellido,
+          correo,
+          asistencia: true,
+        });
+
+      console.log('Asistencia sincronizada correctamente:', data);
+    }
+
+    localStorage.removeItem('pendingAttendances');
+    console.log('Datos locales sincronizados y eliminados.');
+    await this.dismissLoading(); // Ocultar el indicador
+    await this.presentAlert('Sincronización completada', 'Los datos se han sincronizado con éxito.');
+  } catch (error) {
+    console.error('Error al sincronizar asistencias pendientes:', error);
+    await this.dismissLoading(); // Ocultar el indicador si ocurre un error
+    await this.presentErrorAlert('Error al sincronizar los datos.');
+  }
+}
+
+  async presentLoading() {
+    const loading = await this.loadingController.create({
+      message: 'Sincronizando datos...',
+      spinner: 'crescent', // Puedes cambiar el estilo del spinner
+      duration: 0 // El indicador no se ocultará automáticamente
+    });
+    await loading.present();
+  }
+
+  async dismissLoading() {
+    try {
+      await this.loadingController.dismiss();
     } catch (error) {
-      console.error('Error al sincronizar asistencias pendientes:', error);
-      await this.presentErrorAlert('Error al sincronizar los datos.');
+      console.error('Error al cerrar el loading:', error);
     }
   }
+
+  
 
   // Navegación
   goToRamos() {

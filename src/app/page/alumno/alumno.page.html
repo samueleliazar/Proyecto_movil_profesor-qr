@@ -32,7 +32,12 @@
         </div>
       </div>
     </ion-list>
-  
-  <!-- Botón para sincronizar datos con Firebase -->
-  <ion-button expand="full" (click)="syncLocalDataToFirebase()">Sincronizar Datos con Firebase</ion-button>
+  <ion-list class="custom-list-second">
+    <div class="container">
+      <div class="link-card">
+          <img src="assets/images/actualizar.png" alt="Ver mis ramos" class="center-imagen">
+          <ion-button expand="full" (click)="syncLocalDataToFirebase()">Actualizar datos</ion-button>
+        </div>
+      </div>
+    </ion-list>
 </ion-content>
