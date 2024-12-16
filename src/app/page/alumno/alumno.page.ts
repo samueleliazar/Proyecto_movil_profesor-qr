@@ -109,6 +109,40 @@ export class AlumnoPage implements OnInit {
           correo,
           asistencia: true,
         });
+         // Acceder al ramo en la colección del profesor y registrar al estudiante
+      const ramoRef = this.firestore
+      .collection('profesores') // Colección profesores
+      .doc(profesorUid) // Documento del profesor (UID)
+      .collection('ramos') // Subcolección ramos
+      .doc(ramoId); // Documento del ramo
+
+    // Validar si el documento del ramo existe
+    const ramoDoc = await ramoRef.get().toPromise();
+    if (!ramoDoc || !ramoDoc.exists) {
+      await this.presentErrorAlert(
+        'No se encontró el ramo especificado en la base de datos.'
+      );
+      return;
+    }
+
+    // Acceder a la subcolección "estudiantes" dentro del ramo
+    const estudianteRef = ramoRef.collection('estudiantes').doc(studentUid);
+
+    // Verificar si el estudiante ya está registrado en la subcolección "estudiantes"
+    const estudianteDoc = await estudianteRef.get().toPromise();
+
+    if (estudianteDoc && estudianteDoc.exists) {
+      await this.presentErrorAlert('El estudiante ya está registrado en este ramo.');
+      return;
+    }
+
+    // Registrar al estudiante en la subcolección "estudiantes"
+    await estudianteRef.set({
+      uid: studentUid,
+      nombre,
+      apellido,
+      correo,
+    });
 
       console.log('Asistencia registrada correctamente.');
       await this.presentSuccessAlert();
